@@ -1,4 +1,7 @@
 import argparse
+import os
+
+from . import data
 
 def main():
     args = parse_args()
@@ -16,5 +19,4 @@ def parse_args():
     return parser.parse_args()
 
 def init(args):
-    print("Hello World from AGit")
-    print('Initialized an empty repository')
+    data.init()
