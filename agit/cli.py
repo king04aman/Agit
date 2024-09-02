@@ -15,8 +15,17 @@ def parse_args():
 
     init_parser = commands.add_parser('init', help='Initialize a new, empty repository')
     init_parser.set_defaults(func=init)
+
+    hash_object_parser = commands.add_parser('hash-object', help='Store a given blob in the repository')
+    hash_object_parser.add_argument('file')
+    hash_object_parser.set_defaults(func=hash_object)
     
     return parser.parse_args()
 
 def init(args):
     data.init()
+    print(f'Initialized empty agit repository in {os.getcwd()}/{data.GIT_DIR}')
+
+def hash_object(args):
+    with open(args.file, 'rb') as f:
+        print(data.hash_object(f.read()))
