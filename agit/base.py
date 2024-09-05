@@ -10,8 +10,8 @@ def write_tree(directory='.'):
                 continue
 
             if entry.is_file(follow_symlinks=False):
-                # TODO write the file to the object store
-                pass
+                with open(full, 'rb') as f:
+                    print(data.hash_object(f.read()))
             elif entry.is_dir(follow_symlinks=False):
                 write_tree(full)
 
