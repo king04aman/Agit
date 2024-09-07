@@ -44,4 +44,4 @@ def cat_file(args):
     sys.stdout.buffer.write(data.get_object(args.object, expected=None))
 
 def write_tree(args):
-    print(write_tree())
+    print(base.write_tree())
