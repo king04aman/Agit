@@ -33,6 +33,10 @@ def parse_args():
     read_tree_parser.add_argument('tree')
     read_tree_parser.set_defaults(func=read_tree)
     
+    commit_parser = commands.add_parser('commit', help='Record changes to the repository')
+    commit_parser.add_argument('-m', '--message', required=True, help='Commit message')
+    commit_parser.set_defaults(func=commit)
+
     return parser.parse_args()
 
 def init(args):
@@ -52,6 +56,9 @@ def write_tree(args):
 
 def read_tree(args):
     base.read_tree(args.tree)
+
+def commit(args):
+    print(base.commit(args.message))
 
 if __name__ == '__main__':
     main()
