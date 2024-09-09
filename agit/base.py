@@ -112,6 +112,9 @@ def get_commit(oid):
     message = '\n'.join(lines)
     return Commit(tree=tree, parent=parent, message=message)
 
+def get_oid(name):
+    return data.get_ref(name) or name
+
 def is_ignored(path):
     return '.agit' in path.split('/')
 

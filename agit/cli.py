@@ -16,6 +16,8 @@ def parse_args():
     commands = parser.add_subparsers(title='commands', dest='command')
     commands.required = True
 
+    oid = base.get_oid
+
     init_parser = commands.add_parser('init', help='Initialize a new, empty repository')
     init_parser.set_defaults(func=init)
 
@@ -25,13 +27,13 @@ def parse_args():
 
     cat_file_parser = commands.add_parser('cat-file', help='Provide content of repository objects')
     cat_file_parser.add_argument('object')
-    cat_file_parser.set_defaults(func=cat_file)
+    cat_file_parser.set_defaults(func=cat_file, type=oid)
 
     write_tree_parser = commands.add_parser('write-tree', help='Create a tree object from the current directory')
     write_tree_parser.set_defaults(func=write_tree)
 
     read_tree_parser = commands.add_parser('read-tree', help='Read a tree object into the current directory')
-    read_tree_parser.add_argument('tree')
+    read_tree_parser.add_argument('tree', type=oid)
     read_tree_parser.set_defaults(func=read_tree)
     
     commit_parser = commands.add_parser('commit', help='Record changes to the repository')
@@ -40,15 +42,15 @@ def parse_args():
 
     log_parser = commands.add_parser('log', help='Show history of the repository')
     log_parser.set_defaults(func=log)
-    log_parser.add_argument('oid', nargs='?')
+    log_parser.add_argument('oid', type=oid, nargs='?')
 
     checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
-    checkout_parser.add_argument('oid')
+    checkout_parser.add_argument('oid', type=oid)
     checkout_parser.set_defaults(func=checkout)
 
     tag_parser = commands.add_parser('tag', help='Create a tag reference')
     tag_parser.add_argument('name')
-    tag_parser.add_argument('oid', nargs='?')
+    tag_parser.add_argument('oid', type=oid, nargs='?')
     tag_parser.set_defaults(func=create_tag)
 
     return parser.parse_args()
