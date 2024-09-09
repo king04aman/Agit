@@ -28,7 +28,7 @@ def parse_args():
     cat_file_parser.set_defaults(func=cat_file)
 
     write_tree_parser = commands.add_parser('write-tree', help='Create a tree object from the current directory')
-    write_tree_parser.set_defaults(func=base.write_tree)
+    write_tree_parser.set_defaults(func=write_tree)
 
     read_tree_parser = commands.add_parser('read-tree', help='Read a tree object into the current directory')
     read_tree_parser.add_argument('tree')
@@ -42,7 +42,12 @@ def parse_args():
     log_parser.set_defaults(func=log)
     log_parser.add_argument('oid', nargs='?')
 
+    checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
+    checkout_parser.add_argument('oid')
+    checkout_parser.set_defaults(func=checkout)
+
     return parser.parse_args()
+
 
 def init(args):
     data.init()
@@ -73,6 +78,9 @@ def log(args):
         print(textwrap.indent(commit.message, '    '))
         print('')
         oid = commit.parent
+
+def checkout(args):
+    base.checkout(args.oid)
 
 if __name__ == '__main__':
     main()

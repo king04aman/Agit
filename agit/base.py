@@ -84,8 +84,10 @@ def commit(message):
     data.set_HEAD(oid)
     return oid
 
-def is_ignored(path):
-    return '.agit' in path.split('/')
+def checkout(oid):
+    commit = get_commit(oid)
+    read_tree(commit.tree)
+    data.set_HEAD(oid)
 
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
 
@@ -105,3 +107,7 @@ def get_commit(oid):
 
     message = '\n'.join(lines)
     return Commit(tree=tree, parent=parent, message=message)
+
+def is_ignored(path):
+    return '.agit' in path.split('/')
+
