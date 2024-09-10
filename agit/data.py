@@ -1,37 +1,44 @@
 import os
 import hashlib
 
-
 GIT_DIR = '.agit'
 
 
 def init():
-    os.makedirs(GIT_DIR)
-    os.makedirs(f'{GIT_DIR}/objects')
+    """Initialize a new Git-like repository structure."""
+    os.makedirs(os.path.join(GIT_DIR, 'objects'), exist_ok=True)
+    os.makedirs(os.path.join(GIT_DIR, 'refs'), exist_ok=True)
 
 
 def update_ref(ref, oid):
-    with open(f'{GIT_DIR}/{ref}', 'w') as f:
+    """Update a reference with the given object ID."""
+    with open(os.path.join(GIT_DIR, ref), 'w') as f:
         f.write(oid)
 
 
 def get_ref(ref):
-    if os.path.isfile(f'{GIT_DIR}/{ref}'):
-        with open(f'{GIT_DIR}/{ref}') as f:
+    """Retrieve the object ID associated with a given reference."""
+    ref_path = os.path.join(GIT_DIR, ref)
+    if os.path.isfile(ref_path):
+        with open(ref_path) as f:
             return f.read().strip()
     return None
 
 
 def hash_object(data, type_='blob'):
-    obj = type_.encode() + b'\x00' + data
+    """Hash the given data and store it in the objects directory."""
+    obj = f"{type_}\x00".encode() + data
     oid = hashlib.sha1(obj).hexdigest()
-    with open(f'{GIT_DIR}/objects/{oid}', 'wb') as out:
+    object_path = os.path.join(GIT_DIR, 'objects', oid)
+    with open(object_path, 'wb') as out:
         out.write(obj)
     return oid
 
 
 def get_object(oid, expected='blob'):
-    with open(f'{GIT_DIR}/objects/{oid}', 'rb') as f:
+    """Retrieve the content of an object by its object ID."""
+    object_path = os.path.join(GIT_DIR, 'objects', oid)
+    with open(object_path, 'rb') as f:
         obj = f.read()
     
     type_, _, content = obj.partition(b'\x00')
@@ -43,11 +50,15 @@ def get_object(oid, expected='blob'):
     return content
 
 
-def iter_ref():
+def iter_refs():
+    """Iterate over references in the repository."""
     refs = ['HEAD']
-    for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
-        root = os.path.relpath(root, GIT_DIR)
-        refs.extend(f'{root}/{name}' for name in filenames)
+    refs_dir = os.path.join(GIT_DIR, 'refs')
+    
+    for root, _, filenames in os.walk(refs_dir):
+        for name in filenames:
+            ref_path = os.path.relpath(os.path.join(root, name), GIT_DIR)
+            refs.append(ref_path)
+    
     for ref in refs:
         yield ref, get_ref(ref)
-
