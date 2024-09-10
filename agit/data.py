@@ -1,15 +1,19 @@
 import os
 import hashlib
 
+
 GIT_DIR = '.agit'
+
 
 def init():
     os.makedirs(GIT_DIR)
     os.makedirs(f'{GIT_DIR}/objects')
 
+
 def update_ref(ref, oid):
     with open(f'{GIT_DIR}/{ref}', 'w') as f:
         f.write(oid)
+
 
 def get_ref(ref):
     if os.path.isfile(f'{GIT_DIR}/{ref}'):
@@ -17,12 +21,14 @@ def get_ref(ref):
             return f.read().strip()
     return None
 
+
 def hash_object(data, type_='blob'):
     obj = type_.encode() + b'\x00' + data
     oid = hashlib.sha1(obj).hexdigest()
     with open(f'{GIT_DIR}/objects/{oid}', 'wb') as out:
         out.write(obj)
     return oid
+
 
 def get_object(oid, expected='blob'):
     with open(f'{GIT_DIR}/objects/{oid}', 'rb') as f:
@@ -36,6 +42,7 @@ def get_object(oid, expected='blob'):
     
     return content
 
+
 def iter_ref():
     refs = ['HEAD']
     for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
@@ -43,3 +50,4 @@ def iter_ref():
         refs.extend(f'{root}/{name}' for name in filenames)
     for ref in refs:
         yield ref, get_ref(ref)
+

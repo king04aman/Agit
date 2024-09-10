@@ -6,6 +6,7 @@ import string
 from collections import namedtuple
 from . import data
 
+
 def write_tree(directory='.'):
     entries = []
     with os.scandir(directory) as it:
@@ -26,6 +27,7 @@ def write_tree(directory='.'):
         tree = ''.join(f'{type_} {oid} {name}\n' for name, oid, type_ in sorted(entries))
         return data.hash_object(tree.encode(), 'tree')
 
+
 def _iter_tree_entries(oid):
     if not oid:
         return
@@ -33,6 +35,7 @@ def _iter_tree_entries(oid):
     for entry in tree.decode().splitlines():
         type_, oid, name = entry.split()
         yield type_, oid, name
+
 
 def get_tree(oid, base_path=''):
     result = {}
@@ -47,6 +50,7 @@ def get_tree(oid, base_path=''):
         else:
             assert False, f'Unknown tree entry {type_}'
     return result
+
 
 def _empty_current_directory():
     for root, dirnames, filenames in os.walk('.', topdown=False):
@@ -65,12 +69,14 @@ def _empty_current_directory():
                 # Deletion might fail if the directory is not empty
                 pass
 
+
 def read_tree(tree_oid):
     _empty_current_directory()
     for path, oid in get_tree(tree_oid, base_path='./').items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'wb') as f:
             f.write(data.get_object(oid))
+
 
 def commit(message):
     commit = f'tree {write_tree()}\n'
@@ -85,16 +91,20 @@ def commit(message):
     data.update_ref('HEAD', oid)
     return oid
 
+
 def checkout(oid):
     commit = get_commit(oid)
     read_tree(commit.tree)
     data.update_ref('HEAD', oid)
 
+
 def create_tag(name, oid):
     # TODO implement this
     pass
 
+
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
+
 
 def get_commit(oid):
     parent = None
@@ -113,10 +123,25 @@ def get_commit(oid):
     message = '\n'.join(lines)
     return Commit(tree=tree, parent=parent, message=message)
 
+
+def iter_commits_and_parents(oids):
+    oids = set(oids)
+    visited = set()
+
+    while oids:
+        oid = oids.pop()
+        if not oid or oid in visited:
+            continue
+        visited.add(oid)
+        yield oid
+        
+        commit = get_commit(oid)
+        oids.add(commit.parent)
+
 def get_oid(name):
     if name == '@':
         name = 'HEAD'
-        
+
     refs_to_try = [
         f'{name}',
         f'refs/{name}',
@@ -133,6 +158,7 @@ def get_oid(name):
         return name
     
     assert False, f'Unknown name {name}'
+
 
 def is_ignored(path):
     return '.agit' in path.split('/')

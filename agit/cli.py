@@ -6,9 +6,11 @@ import textwrap
 from . import base
 from . import data
 
+
 def main():
     args = parse_args()
     args.func(args)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='A simple git clone')
@@ -63,22 +65,28 @@ def init(args):
     data.init()
     print(f'Initialized empty agit repository in {os.getcwd()}/{data.GIT_DIR}')
 
+
 def hash_object(args):
     with open(args.file, 'rb') as f:
         print(data.hash_object(f.read()))
+
 
 def cat_file(args):
     sys.stdout.flush()
     sys.stdout.buffer.write(data.get_object(args.object, expected=None))
 
+
 def write_tree(args):
     print(base.write_tree())
+
 
 def read_tree(args):
     base.read_tree(args.tree)
 
+
 def commit(args):
     print(base.commit(args.message))
+
 
 def log(args):
     oid = args.oid
@@ -89,16 +97,28 @@ def log(args):
         print('')
         oid = commit.parent
 
+
 def checkout(args):
     base.checkout(args.oid)
+
 
 def create_tag(args):
     base.create_tag(args.name, args.oid)
 
+
 def k(args):
+    oids = set()
     for refname, ref in data.iter_refs():
         print(refname, ref)
-    #TODO: implement this
+        oids.add(ref)
+    
+    for oid in base.iter_commits_and_parents(oids):
+        commit = base.get_commit(oid)
+        print(oid, commit)
+        if commit.parent:
+            print('Parent', commit.parent)
+
 
 if __name__ == '__main__':
     main()
+
