@@ -35,3 +35,11 @@ def get_object(oid, expected='blob'):
         assert type_ == expected, f'Expected {expected}, got {type_}'
     
     return content
+
+def iter_ref():
+    refs = ['HEAD']
+    for root, _, filenames in os.walk(f'{GIT_DIR}/refs/'):
+        root = os.path.relpath(root, GIT_DIR)
+        refs.extend(f'{root}/{name}' for name in filenames)
+    for ref in refs:
+        yield ref, get_ref(ref)
