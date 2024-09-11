@@ -72,6 +72,12 @@ def parse_args():
     k_parser = commands.add_parser('k', help='k command visualization')
     k_parser.set_defaults(func=k)
 
+    # Command to create a new branch
+    branch_parser = commands.add_parser('branch', help='Create a new branch')
+    branch_parser.add_argument('name')
+    branch_parser.add_argument('start_point', default='@', type=oid, nargs='?')
+    branch_parser.set_defaults(func=branch)
+
     return parser.parse_args()
 
 
@@ -149,6 +155,12 @@ def k(args):
     # Visualize the graph using Graphviz
     with subprocess.Popen(['dot', '-Tgtk', '/dev/stdin'], stdin=subprocess.PIPE) as proc:
         proc.communicate(dot.encode())
+
+
+def branch(args):
+    """Create a new branch with the specified name and optional start point."""
+    base.create_branch(args.name, args.start_point)
+    print(f'Branch {args.name} created at {args.start_point[:10]}')
 
 
 if __name__ == '__main__':

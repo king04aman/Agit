@@ -172,3 +172,7 @@ def get_oid(name):
 def is_ignored(path):
     """Determine if a file or directory should be ignored."""
     return '.agit' in path.split('/')
+
+def create_branch(name, oid):
+    """Create a branch with the given name and object ID."""
+    data.update_ref(f'refs/heads/{name}', oid)
