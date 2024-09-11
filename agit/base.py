@@ -86,13 +86,13 @@ def commit(message):
     """Create a commit with the given message."""
     commit_data = f'tree {write_tree()}\n'
 
-    HEAD = data.get_ref('HEAD')
+    HEAD = data.get_ref('HEAD').value
     if HEAD:
         commit_data += f'parent {HEAD}\n'
 
     commit_data += '\n' + message + '\n'
     oid = data.hash_object(commit_data.encode(), 'commit')
-    data.update_ref('HEAD', oid)
+    data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
     return oid
 
 
@@ -100,13 +100,17 @@ def checkout(oid):
     """Checkout a specific commit by its object ID."""
     commit_data = get_commit(oid)
     read_tree(commit_data.tree)
-    data.update_ref('HEAD', oid)
+    data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 
 def create_tag(name, oid):
     """Create a tag (to be implemented)."""
-    # TODO: Implement this
-    pass
+    data.update_ref (f'refs/tags/{name}', data.RefValue (symbolic=False, value=oid))
+
+
+def create_branch(name, oid):
+    """Create a branch with the given name and object ID."""
+    data.update_ref(f'refs/heads/{name}', data.RefValue(symbolic=False, value=oid))
 
 
 Commit = namedtuple('Commit', ['tree', 'parent', 'message'])
@@ -159,8 +163,8 @@ def get_oid(name):
     ]
 
     for ref in refs_to_try:
-        if data.get_ref(ref):
-            return data.get_ref(ref)
+        if data.get_ref(ref).value:
+            return data.get_ref(ref).value
 
     is_hex = all(c in string.hexdigits for c in name)
     if len(name) == 40 and is_hex:
@@ -173,6 +177,3 @@ def is_ignored(path):
     """Determine if a file or directory should be ignored."""
     return '.agit' in path.split('/')
 
-def create_branch(name, oid):
-    """Create a branch with the given name and object ID."""
-    data.update_ref(f'refs/heads/{name}', oid)

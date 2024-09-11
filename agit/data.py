@@ -1,7 +1,11 @@
 import os
 import hashlib
 
+from collections import namedtuple
+
+
 GIT_DIR = '.agit'
+RefValue = namedtuple('RefValue', ['symbolic', 'value'])
 
 
 def init():
@@ -10,10 +14,13 @@ def init():
     os.makedirs(os.path.join(GIT_DIR, 'refs'), exist_ok=True)
 
 
-def update_ref(ref, oid):
+def update_ref(ref, value):
     """Update a reference with the given object ID."""
-    with open(os.path.join(GIT_DIR, ref), 'w') as f:
-        f.write(oid)
+    assert not value.symbolic
+    ref_path = os.path.join(GIT_DIR, ref)
+    os.makedirs(os.path.dirname(ref_path), exist_ok=True)
+    with open(ref_path, 'w') as f:
+        f.write(value.value)
 
 
 def get_ref(ref):
@@ -27,7 +34,7 @@ def get_ref(ref):
     if value and value.startswith('ref: '):
         return get_ref(value.split(':', 1)[1])
     
-    return value
+    return RefValue(symbolic=False, value=value)
 
 
 def hash_object(data, type_='blob'):
