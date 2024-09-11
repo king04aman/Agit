@@ -19,10 +19,15 @@ def update_ref(ref, oid):
 def get_ref(ref):
     """Retrieve the object ID associated with a given reference."""
     ref_path = os.path.join(GIT_DIR, ref)
+    value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
-            return f.read().strip()
-    return None
+            value = f.read().strip()
+    
+    if value and value.startswith('ref: '):
+        return get_ref(value.split(':', 1)[1])
+    
+    return value
 
 
 def hash_object(data, type_='blob'):
