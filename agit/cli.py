@@ -83,7 +83,7 @@ def parse_args():
 
 def init(args):
     """Initialize a new repository and create the necessary directories."""
-    data.init()
+    base.init()
     print(f'Initialized empty agit repository in {os.getcwd()}/{data.GIT_DIR}')
 
 
