@@ -17,6 +17,7 @@ def init():
 def update_ref(ref, value):
     """Update a reference with the given object ID."""
     assert not value.symbolic
+    ref = _get_ref_internal(ref)[0]
     ref_path = os.path.join(GIT_DIR, ref)
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
@@ -25,16 +26,23 @@ def update_ref(ref, value):
 
 def get_ref(ref):
     """Retrieve the object ID associated with a given reference."""
+    return _get_ref_internal(ref)[1]
+
+
+def _get_ref_internal(ref):
+    """Retrieve the object ID associated with a given reference."""
     ref_path = os.path.join(GIT_DIR, ref)
     value = None
     if os.path.isfile(ref_path):
         with open(ref_path) as f:
             value = f.read().strip()
     
-    if value and value.startswith('ref: '):
-        return get_ref(value.split(':', 1)[1])
+    symbolic = bool(value) and value.startswith('ref:')
+    if symbolic:
+        value = value.split(':', 1)[1].strip()
+        return _get_ref_internal(value)
     
-    return RefValue(symbolic=False, value=value)
+    return ref, RefValue(symbolic=False, value=value)
 
 
 def hash_object(data, type_='blob'):
