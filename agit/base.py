@@ -96,11 +96,18 @@ def commit(message):
     return oid
 
 
-def checkout(oid):
+def checkout(name):
     """Checkout a specific commit by its object ID."""
+    oid = get_oid(name)
     commit_data = get_commit(oid)
     read_tree(commit_data.tree)
-    data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
+
+    if is_branch(name):
+        HEAD = data.RefValue(symbolic=True, value=f'refs/heads/{name}')
+    else:
+        HEAD = data.RefValue(symbolic=False, value=oid)
+    
+    data.update_ref('HEAD', HEAD, deref=False)
 
 
 def create_tag(name, oid):
@@ -177,3 +184,6 @@ def is_ignored(path):
     """Determine if a file or directory should be ignored."""
     return '.agit' in path.split('/')
 
+def is_branch(branch):
+    """Determine if a branch exists."""
+    return data.get_ref(f'refs/heads/{branch}').value is not None

@@ -7,7 +7,7 @@ setup(
     version='1.0.0',
     author='Aman Kumar',
     author_email='aman.kumar@email.com',
-    description='A brief description of your project',
+    description='A simple Git-like version control system',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/king04aman/agit',

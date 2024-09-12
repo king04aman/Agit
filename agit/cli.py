@@ -59,7 +59,7 @@ def parse_args():
 
     # Command to checkout a commit by its object ID
     checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
-    checkout_parser.add_argument('oid', type=oid)
+    checkout_parser.add_argument('commit')
     checkout_parser.set_defaults(func=checkout)
 
     # Command to create a tag reference
@@ -125,7 +125,7 @@ def log(args):
 
 def checkout(args):
     """Checkout the specified commit by its object ID."""
-    base.checkout(args.oid)
+    base.checkout(args.commit)
 
 
 def create_tag(args):
