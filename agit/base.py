@@ -185,9 +185,20 @@ def get_oid(name):
     raise ValueError(f'Unknown name {name}')
 
 
+def get_branch_name():
+    HEAD = data.get_ref('HEAD', deref=False)
+    if not HEAD.symbolic:
+        return None
+
+    HEAD = HEAD.value
+    assert HEAD.startswith('refs/heads/')
+    return os.path.relpath(HEAD, 'refs/heads/')
+
+
 def is_ignored(path):
     """Determine if a file or directory should be ignored."""
     return '.agit' in path.split('/')
+
 
 def is_branch(branch):
     """Determine if a branch exists."""
