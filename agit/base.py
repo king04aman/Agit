@@ -163,7 +163,7 @@ def get_oid(name):
     ]
 
     for ref in refs_to_try:
-        if data.get_ref(ref).value:
+        if data.get_ref(ref, deref=False).value:
             return data.get_ref(ref).value
 
     is_hex = all(c in string.hexdigits for c in name)

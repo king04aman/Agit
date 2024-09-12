@@ -138,10 +138,11 @@ def k(args):
     dot = 'digraph commits {\n'
 
     oids = set()
-    for refname, ref in data.iter_refs():
+    for refname, ref in data.iter_refs(deref=False):
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref.value}"\n'
-        oids.add(ref.value)
+        if not ref.symbolic:
+            oids.add(ref.value)
     
     for oid in base.iter_commits_and_parents(oids):
         commit_data = base.get_commit(oid)

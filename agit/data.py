@@ -14,22 +14,28 @@ def init():
     os.makedirs(os.path.join(GIT_DIR, 'refs'), exist_ok=True)
 
 
-def update_ref(ref, value):
+def update_ref(ref, value, deref=True):
     """Update a reference with the given object ID."""
-    assert not value.symbolic
-    ref = _get_ref_internal(ref)[0]
+    ref = _get_ref_internal(ref, deref)[0]
+
+    assert value.value
+    if value.symbolic:
+        value = f'ref: {value.value}'
+    else:
+        value = value.value
+
     ref_path = os.path.join(GIT_DIR, ref)
     os.makedirs(os.path.dirname(ref_path), exist_ok=True)
     with open(ref_path, 'w') as f:
-        f.write(value.value)
+        f.write(value)
 
 
-def get_ref(ref):
+def get_ref(ref, deref=True):
     """Retrieve the object ID associated with a given reference."""
     return _get_ref_internal(ref)[1]
 
 
-def _get_ref_internal(ref):
+def _get_ref_internal(ref, deref):
     """Retrieve the object ID associated with a given reference."""
     ref_path = os.path.join(GIT_DIR, ref)
     value = None
@@ -40,7 +46,8 @@ def _get_ref_internal(ref):
     symbolic = bool(value) and value.startswith('ref:')
     if symbolic:
         value = value.split(':', 1)[1].strip()
-        return _get_ref_internal(value)
+        if deref:
+            return _get_ref_internal(value, deref=True)
     
     return ref, RefValue(symbolic=False, value=value)
 
@@ -70,7 +77,7 @@ def get_object(oid, expected='blob'):
     return content
 
 
-def iter_refs():
+def iter_refs(deref=True):
     """Iterate over references in the repository."""
     refs = ['HEAD']
     refs_dir = os.path.join(GIT_DIR, 'refs')
@@ -81,4 +88,4 @@ def iter_refs():
             refs.append(ref_path)
     
     for ref in refs:
-        yield ref, get_ref(ref)
+        yield ref, get_ref(ref, deref=deref)
