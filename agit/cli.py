@@ -74,7 +74,7 @@ def parse_args():
 
     # Command to create a new branch
     branch_parser = commands.add_parser('branch', help='Create a new branch')
-    branch_parser.add_argument('name')
+    branch_parser.add_argument('name', nargs='?')
     branch_parser.add_argument('start_point', default='@', type=oid, nargs='?')
     branch_parser.set_defaults(func=branch)
 
@@ -163,8 +163,14 @@ def k(args):
 
 def branch(args):
     """Create a new branch with the specified name and optional start point."""
-    base.create_branch(args.name, args.start_point)
-    print(f'Branch {args.name} created at {args.start_point[:10]}')
+    if not args.name:
+        current = base.get_branch_name()
+        for branch in base.iter_branch_names():
+            prefix = '*' if branch == current else ' '
+            print(f'{prefix} {branch}')
+    else:
+        base.create_branch(args.name, args.start_point)
+        print(f'Branch {args.name} created at {args.start_point[:10]}')
 
 
 def status(args):

@@ -185,6 +185,12 @@ def get_oid(name):
     raise ValueError(f'Unknown name {name}')
 
 
+def iter_branch_names():
+    """Iterate over all branch names."""
+    for refname, _ in data.iter_refs('refs/heads'):
+        yield os.path.relpath(refname, 'refs/heads/')
+        
+
 def get_branch_name():
     HEAD = data.get_ref('HEAD', deref=False)
     if not HEAD.symbolic:

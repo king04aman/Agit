@@ -77,7 +77,7 @@ def get_object(oid, expected='blob'):
     return content
 
 
-def iter_refs(deref=True):
+def iter_refs(prefix='', deref=True):
     """Iterate over references in the repository."""
     refs = ['HEAD']
     refs_dir = os.path.join(GIT_DIR, 'refs')
@@ -88,4 +88,6 @@ def iter_refs(deref=True):
             refs.append(ref_path)
     
     for ref in refs:
+        if not ref.startswith(prefix):
+            continue
         yield ref, get_ref(ref, deref=deref)
