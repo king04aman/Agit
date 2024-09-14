@@ -57,6 +57,11 @@ def parse_args():
     log_parser.set_defaults(func=log)
     log_parser.add_argument('oid', default='@', type=oid, nargs='?')
 
+    # Command to show the diff content of a repository commit object
+    show_parser = commands.add_parser('show', help='Show the diff content of a repository commit object')
+    show_parser.add_argument('oid', default='@', type=oid, nargs='?')
+    show_parser.set_defaults(func=show)
+
     # Command to checkout a commit by its object ID
     checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
     checkout_parser.add_argument('commit')
@@ -124,6 +129,14 @@ def commit(args):
     print(base.commit(args.message))
 
 
+def _print_commit(oid, commit_data, refs=None):
+    """Print the commit data."""
+    refs_str = f' ({", ".join(refs)})' if refs else ''
+    print(f'commit {oid}{refs_str}\n')
+    print(textwrap.indent(commit_data.message, '    '))
+    print('')
+    
+
 def log(args):
     """Display the commit history starting from the specified object ID."""
     refs = {}
@@ -132,12 +145,16 @@ def log(args):
 
     for oid in base.iter_commits_and_parents({args.oid}):
         commit_data = base.get_commit(oid)
+        _print_commit(oid, commit_data, refs.get(oid))
 
-        refs_str = f' ({", ".join(refs[oid])})' if oid in refs else ''
-        print(f'commit {oid}{refs_str}')
-        print(textwrap.indent(commit_data.message, '    '))
-        print('')
 
+def show(args):
+    """Show the diff content of a commit object."""
+    if not args.oid:
+        return
+    commit = base.get_commit(args.oid)
+    _print_commit(args.oid, commit)
+    
 
 def checkout(args):
     """Checkout the specified commit by its object ID."""
@@ -189,7 +206,7 @@ def branch(args):
 def reset(args):
     """Reset the current HEAD to the specified object ID."""
     base.reset(args.commit)
-    
+
 
 def status(args):
     HEAD = base.get_oid('@')
