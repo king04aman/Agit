@@ -77,9 +77,16 @@ def parse_args():
     branch_parser.add_argument('name', nargs='?')
     branch_parser.add_argument('start_point', default='@', type=oid, nargs='?')
     branch_parser.set_defaults(func=branch)
-
+    
+    # Command to show the working tree status
     status_parser = commands.add_parser('status', help='Show the working tree status')
     status_parser.set_defaults(func=status)
+
+    # Command to reset the current HEAD to the specified object ID  (Commit)
+    reset_parser = commands.add_parser('reset', help='Reset the current HEAD to the specified object ID (Commit)')
+    reset_parser.add_argument('commit', type=oid)
+    reset_parser.set_defaults(func=reset)
+
 
     return parser.parse_args()
 
@@ -178,6 +185,11 @@ def branch(args):
         base.create_branch(args.name, args.start_point)
         print(f'Branch {args.name} created at {args.start_point[:10]}')
 
+
+def reset(args):
+    """Reset the current HEAD to the specified object ID."""
+    base.reset(args.commit)
+    
 
 def status(args):
     HEAD = base.get_oid('@')
