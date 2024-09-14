@@ -1,4 +1,8 @@
 from collections import defaultdict
+import subprocess
+from tempfile import NamedTemporaryFile as Temp
+
+from . import data
 
 
 def compare_trees(*trees):
@@ -14,9 +18,25 @@ def compare_trees(*trees):
 
 def diff_trees(tree1, tree2):
     """Diff two trees and return the output."""
-    output = ''
-    for path, oid1, oid2 in compare_trees(tree1, tree2):
-        if oid1 != oid2:
-            output += (f'blob {oid1} {oid2} {path}')
+    output = b''
+    for path, o_from, o_to in compare_trees(tree1, tree2):
+        if o_from != o_to:
+            output += diff_blobs(o_from, o_to, path)
     
     return output
+
+
+def diff_blobs(o_from, o_to, path='blob'):
+    """Diff two blobs and return the output."""
+    with Temp() as from_file, Temp() as to_file:
+        for oid, file in [(o_from, from_file), (o_to, to_file)]:
+            if oid:
+                file.write(data.get_object(oid))
+                file.flush()
+        
+        with subprocess.Popen(
+            ['diff', '--unified', '--show-c-function', '--label', f'a/{path}',  from_file.name, '--label', f'b/{path}', to_file.name],
+            stdout=subprocess.PIPE) as proc:
+            output, _ = proc.communicate()
+
+        return output

@@ -160,8 +160,9 @@ def show(args):
 
     _print_commit(args.oid, commit)
     result = diff.diff_trees(base.get_tree(parent_tree), base.get_tree(commit.tree))
-    print(result)
-    
+    sys.stdout.flush()
+    sys.stdout.buffer.write(result)
+
 
 def checkout(args):
     """Checkout the specified commit by its object ID."""
