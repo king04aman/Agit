@@ -98,6 +98,9 @@ def parse_args():
     reset_parser.add_argument('commit', type=oid)
     reset_parser.set_defaults(func=reset)
 
+    merge_parser = commands.add_parser('merge', help='Merge the specified commit into the current branch')
+    merge_parser.add_argument('commit', type=oid)
+    merge_parser.set_defaults(func=merge)
 
     return parser.parse_args()
 
@@ -223,6 +226,11 @@ def branch(args):
         base.create_branch(args.name, args.start_point)
         print(f'Branch {args.name} created at {args.start_point[:10]}')
 
+
+def merge(args):
+    """Merge the specified commit into the current branch."""
+    base.merge(args.commit)
+    
 
 def reset(args):
     """Reset the current HEAD to the specified object ID."""

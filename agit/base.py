@@ -134,6 +134,10 @@ def reset(oid):
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 
+def merge(other):
+    # Get the current branch and commit to merge
+    pass
+
 def create_tag(name, oid):
     """Create a tag (to be implemented)."""
     data.update_ref (f'refs/tags/{name}', data.RefValue (symbolic=False, value=oid))
