@@ -59,6 +59,20 @@ def get_tree(oid, base_path=''):
     return result
 
 
+def get_working_tree():
+    """Retrieve the current working tree."""
+    result = {}
+    for root, _, filenames in os.walk('.'):
+        for filename in filenames:
+            path = os.path.relpath(os.path.join(root, filename))
+            if is_ignored(path) or not os.path.isfile(path):
+                continue
+            with open(path, 'rb') as f:
+                result[path] = data.hash_object(f.read())
+
+    return result
+
+
 def _empty_current_directory():
     """Remove all files and directories from the current directory."""
     for root, dirnames, filenames in os.walk('.', topdown=False):
@@ -118,7 +132,7 @@ def checkout(name):
 def reset(oid):
     """Reset the current HEAD to the specified object ID."""
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
-    
+
 
 def create_tag(name, oid):
     """Create a tag (to be implemented)."""

@@ -63,6 +63,11 @@ def parse_args():
     show_parser.add_argument('oid', default='@', type=oid, nargs='?')
     show_parser.set_defaults(func=show)
 
+    # Command to show the diff content of a repository commit object    
+    diff_parser = commands.add_parser('diff', help='Show the diff content of a repository commit object')
+    diff_parser.add_argument('commit', default='@', type=oid, nargs='?')
+    diff_parser.set_defaults(func=_diff)
+
     # Command to checkout a commit by its object ID
     checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
     checkout_parser.add_argument('commit')
@@ -163,6 +168,14 @@ def show(args):
     sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
+
+def _diff(args):
+    tree = args.commit and base.get_commit(args.commit).tree
+
+    result = diff.diff_trees(base.get_tree(tree), base.get_working_tree())
+    sys.stdout.flush()
+    sys.stdout.buffer.write(result)
+    
 
 def checkout(args):
     """Checkout the specified commit by its object ID."""
