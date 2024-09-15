@@ -3,7 +3,9 @@ import itertools
 import operator
 import string
 from collections import deque, namedtuple
+
 from . import data
+from . import diff
 
 
 def init():
@@ -134,9 +136,25 @@ def reset(oid):
     data.update_ref('HEAD', data.RefValue(symbolic=False, value=oid))
 
 
+def read_tree_merged(t_HEAD, t_other):
+    """Read the tree object into the current directory."""
+    _empty_current_directory()
+    for path, blob in diff.merge_trees(get_tree(t_HEAD), get_tree(t_other)).items():
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            f.write(blob)
+
+
 def merge(other):
-    # Get the current branch and commit to merge
-    pass
+    """Merge the specified branch into the current one."""
+    HEAD = data.get_ref('HEAD').value
+    assert HEAD
+    c_HEAD = get_commit(HEAD)
+    c_other = get_commit(other)
+
+    read_tree_merged(c_HEAD.tree, c_other.tree)
+    print('Merged in working directory. Use "agit commit" to conclude merge.')
+    
 
 def create_tag(name, oid):
     """Create a tag (to be implemented)."""
