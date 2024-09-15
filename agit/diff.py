@@ -16,6 +16,16 @@ def compare_trees(*trees):
         yield(path, *oids)
 
 
+def iter_changed_files(tree1, tree2):
+    """Iterate over changed files between two trees."""
+    for path, o_from, o_to in compare_trees(tree1, tree2):
+        if o_from != o_to:
+            action = ('new file' if not o_from else
+                      'deleted' if not o_to else
+                      'modified')
+            yield path, action
+            
+
 def diff_trees(tree1, tree2):
     """Diff two trees and return the output."""
     output = b''
