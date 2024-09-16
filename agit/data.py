@@ -35,6 +35,12 @@ def get_ref(ref, deref=True):
     return _get_ref_internal(ref)[1]
 
 
+def delete_ref(ref, deref=True):
+    """Delete a reference."""
+    ref = _get_ref_internal(ref, deref)[0]
+    os.remove(os.path.join(GIT_DIR, ref))
+    
+
 def _get_ref_internal(ref, deref):
     """Retrieve the object ID associated with a given reference."""
     ref_path = os.path.join(GIT_DIR, ref)
