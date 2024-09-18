@@ -2,10 +2,21 @@ import os
 import hashlib
 
 from collections import namedtuple
+from contextlib import contextmanager
 
 
-GIT_DIR = '.agit'
+# Will be initialized by the `cli.main()` function
+GIT_DIR = None
 RefValue = namedtuple('RefValue', ['symbolic', 'value'])
+
+
+@contextmanager
+def change_git_dir(new_dir):
+    """Change the GIT_DIR context for the duration of the context manager."""
+    global GIT_DIR
+    old_dir, GIT_DIR = GIT_DIR, f'{new_dir}/.agit'
+    yield
+    GIT_DIR = old_dir
 
 
 def init():
