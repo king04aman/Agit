@@ -52,22 +52,30 @@ def diff_blobs(o_from, o_to, path='blob'):
         return output
 
 
-def merge_trees(t_HEAD, t_other):
+def merge_trees(t_base, t_HEAD, t_other):
     tree = {}
-    for path, o_HEAD, o_other in compare_trees(t_HEAD, t_other):
-        tree[path] = merge_blobs(o_HEAD, o_other)
+    for path, o_base, o_HEAD, o_other in compare_trees(t_base, t_HEAD, t_other):
+        tree[path] = merge_blobs(o_base, o_HEAD, o_other)
     return tree
 
 
-def merge_blobs(o_HEAD, o_other):
-    with Temp() as f_HEAD, Temp() as f_other:
-        for oid, f in ((o_HEAD, f_HEAD), (o_other, f_other)):
+def merge_blobs(o_base, o_HEAD, o_other):
+    with Temp() as f_base, Temp() as f_HEAD, Temp() as f_other:
+
+        #Write blobs to temporary files
+        for oid, f in ((o_base, f_base), (o_HEAD, f_HEAD), (o_other, f_other)):
             if oid:
                 f.write(data.get_object(oid))
                 f.flush()
         
-        with subprocess.Popen(['diff', '-DHEAD', f_HEAD.name, f_other.name], stdout=subprocess.PIPE) as proc:
+        with subprocess.Popen(
+            ['diff3', '-m',
+             '-L', 'HEAD', f_HEAD.name,
+             '-L', 'BASE', f_base.name,
+             '-L', 'MERGE_HEAD', f_other.name],
+            stdout=subprocess.PIPE) as proc:
             output, _ = proc.communicate()
-        
+            assert proc.returncode in (0,1)
+
         return output
 
