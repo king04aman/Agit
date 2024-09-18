@@ -162,6 +162,15 @@ def merge(other):
     print('Merged in working directory. Use "agit commit" to conclude merge.')
 
 
+def get_merge_base(oid1, oid2):
+    """Retrieve the merge base of two commits."""
+    parents1 = set(iter_commits_and_parents({oid1}))
+
+    for oid in iter_commits_and_parents({oid2}):
+        if oid in parents1:
+            return oid
+        
+
 def create_tag(name, oid):
     """Create a tag (to be implemented)."""
     data.update_ref (f'refs/tags/{name}', data.RefValue (symbolic=False, value=oid))
