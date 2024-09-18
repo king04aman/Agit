@@ -155,11 +155,19 @@ def merge(other):
     HEAD = data.get_ref('HEAD').value
     assert HEAD
     merge_base = get_merge_base(other, HEAD)
-    c_base = get_commit(merge_base)
-    c_HEAD = get_commit(HEAD)
     c_other = get_commit(other)
 
+    # Handle Fast-forward Merge: the current branch is an ancestor of the other branch
+    if merge_base == HEAD:
+        read_tree(c_other.tree)
+        data.update_ref('HEAD', data.RefValue(symbolic=False, value=other))
+        print(f'Fast-forward merge, no need to commit. Use "agit checkout {other}" to access the new changes.')
+        return
+
     data.update_ref('MERGE_HEAD', data.RefValue(symbolic=False, value=other))
+
+    c_base = get_commit(merge_base)
+    c_HEAD = get_commit(HEAD)
     read_tree_merged(c_base.tree, c_HEAD.tree, c_other.tree)
     print('Merged in working directory. Use "agit commit" to conclude merge.')
 
