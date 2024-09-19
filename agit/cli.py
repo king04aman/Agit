@@ -7,6 +7,7 @@ import subprocess
 from . import base
 from . import data
 from . import diff
+from . import remote
 
 
 def main():
@@ -99,15 +100,20 @@ def parse_args():
     reset_parser.add_argument('commit', type=oid)
     reset_parser.set_defaults(func=reset)
 
+    # Command to merge the specified commit into the current branch
     merge_parser = commands.add_parser('merge', help='Merge the specified commit into the current branch')
     merge_parser.add_argument('commit', type=oid)
     merge_parser.set_defaults(func=merge)
 
+    # Command to show the merge base of two commits
     merge_base_parser = commands.add_parser('merge-base', help='Show the merge base of two commits')
     merge_base_parser.add_argument('commit1', type=oid)
     merge_base_parser.add_argument('commit2', type=oid)
     merge_base_parser.set_defaults(func=merge_base)
 
+    fetch_parser = commands.add_parser('fetch', help='Fetch changes from a remote repository')
+    fetch_parser.add_argument('remote')
+    fetch_parser.set_defaults(func=fetch)
 
     return parser.parse_args()
 
@@ -244,6 +250,11 @@ def merge_base(args):
     """Show the merge base of two commits."""
     print(base.get_merge_base(args.commit1, args.commit2))
 
+
+def fetch(args):
+    """Fetch changes from a remote repository."""
+    remote.fetch(args.remote)
+    
 
 def reset(args):
     """Reset the current HEAD to the specified object ID."""
