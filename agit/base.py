@@ -278,3 +278,24 @@ def is_ignored(path):
 def is_branch(branch):
     """Determine if a branch exists."""
     return data.get_ref(f'refs/heads/{branch}').value is not None
+
+def iter_objects_in_commits(oids):
+    """Iterate through objects in a set of commits."""
+    visited = set()
+    def iter_objects_in_tree(oid):
+        visited.add(oid)
+        yield oid
+        for type_, oid, _ in _iter_tree_entries(oid):
+            if oid not in visited:
+                if type_ == 'tree':
+                    yield from iter_objects_in_tree(oid)
+                else:
+                    visited.add(oid)
+                    yield oid
+    
+    for oid in iter_commits_and_parents(oids):
+        yield oid
+        commit = get_commit(oid)
+        if commit.tree not in visited:
+            yield from iter_objects_in_tree(commit.tree)
+    

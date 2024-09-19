@@ -1,5 +1,6 @@
 import os
 import hashlib
+import shutil
 
 from collections import namedtuple
 from contextlib import contextmanager
@@ -111,3 +112,16 @@ def iter_refs(prefix='', deref=True):
         if ref.value:
             yield refname, ref
         
+
+def object_exists(oid):
+    """Check if an object exists in the repository."""
+    return os.path.exists(os.path.join(GIT_DIR, 'objects', oid))
+
+
+def fetch_object_if_missing(oid, remote_git_dir):
+    """Fetch an object from a remote repository if it is missing."""
+    if object_exists(oid):
+        return
+    remote_git_dir += '/.agit'
+    shutil.copy(f'{remote_git_dir}/objects/{oid}', f'{GIT_DIR}/objects/{oid}')
+
