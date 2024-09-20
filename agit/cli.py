@@ -111,9 +111,15 @@ def parse_args():
     merge_base_parser.add_argument('commit2', type=oid)
     merge_base_parser.set_defaults(func=merge_base)
 
+    # Command to fetch changes from a remote repository
     fetch_parser = commands.add_parser('fetch', help='Fetch changes from a remote repository')
     fetch_parser.add_argument('remote')
     fetch_parser.set_defaults(func=fetch)
+
+    push_parser = commands.add_parser('push', help='Push changes to a remote repository')
+    push_parser.add_argument('remote')
+    push_parser.add_argument('branch')
+    push_parser.set_defaults(func=push)
 
     return parser.parse_args()
 
@@ -254,7 +260,12 @@ def merge_base(args):
 def fetch(args):
     """Fetch changes from a remote repository."""
     remote.fetch(args.remote)
-    
+
+
+def push(args):
+    """Push changes to a remote repository."""
+    remote.push(args.remote, f'refs/heads/{args.branch}')
+
 
 def reset(args):
     """Reset the current HEAD to the specified object ID."""
