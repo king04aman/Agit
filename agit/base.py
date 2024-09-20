@@ -304,3 +304,14 @@ def iter_objects_in_commits(oids):
         if commit.tree not in visited:
             yield from iter_objects_in_tree(commit.tree)
     
+
+def add(filenames):
+    """Add files to the index."""
+    with data.get_index() as index:
+        for filename in filenames:
+            # Normalize the path
+            filename = os.path.relpath(filename)
+            with open(filename, 'rb') as f:
+                oid = data.hash_object(f.read())
+            index[filename] = oid
+

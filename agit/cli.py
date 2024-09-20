@@ -116,10 +116,17 @@ def parse_args():
     fetch_parser.add_argument('remote')
     fetch_parser.set_defaults(func=fetch)
 
+    # Command to push changes to a remote repository
     push_parser = commands.add_parser('push', help='Push changes to a remote repository')
     push_parser.add_argument('remote')
     push_parser.add_argument('branch')
     push_parser.set_defaults(func=push)
+
+    # Command to add file contents to the index
+    add_parser = commands.add_parser('add', help='Add file contents to the index')
+    add_parser.add_argument('files', nargs='+')
+    add_parser.set_defaults(func=add)
+
 
     return parser.parse_args()
 
@@ -289,6 +296,10 @@ def status(args):
     for path, action in diff.iter_changed_files(base.get_tree(HEAD_tree), base.get_working_tree()):
         print(f'    {action:>12}: {path}')
 
+
+def add(args):
+    """Add file contents to the index."""
+    base.add(args.files)
 
 
 if __name__ == '__main__':

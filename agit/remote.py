@@ -53,4 +53,3 @@ def push(remote_path, refname):
     with data.change_git_dir(remote_path):
         data.update_ref(refname, data.RefValue(symbolic=False, value=local_ref))
 
-        
