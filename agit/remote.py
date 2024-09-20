@@ -32,8 +32,12 @@ def _get_remote_refs(remote_path, prefix=''):
 def push(remote_path, refname):
     # Get the ref from the local repository
     remote_refs = _get_remote_refs(remote_path)
+    remote_refs = remote_refs.get(refname)
     local_ref = data.get_ref(refname).value
     assert local_ref
+
+    # Don't push if the remote ref is an ancestor of the local ref
+    assert not remote_refs or base.is_ancestor_of(local_ref, remote_refs)
 
     # Compute which objects to push
     known_remote_refs = filter(data.object_exists, remote_refs.values())
