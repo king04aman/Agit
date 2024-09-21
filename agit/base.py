@@ -307,11 +307,28 @@ def iter_objects_in_commits(oids):
 
 def add(filenames):
     """Add files to the index."""
+
+    def add_file(filename):
+        # Normalize the path
+        filename = os.path.relpath(filename)
+        with open(filename, 'rb') as f:
+            oid = data.hash_object(f.read())
+        index[filename] = oid
+
+    def add_directory(dirname):
+        for root, _, filenames in os.walk(dirname):
+            for filename in filenames:
+                # Normalize the path
+                path = os.path.relpath(os.path.join(root, filename))
+                if is_ignored(path) or not os.path.isfile(path):
+                    continue
+                add_file(path)
+
     with data.get_index() as index:
-        for filename in filenames:
-            # Normalize the path
-            filename = os.path.relpath(filename)
-            with open(filename, 'rb') as f:
-                oid = data.hash_object(f.read())
-            index[filename] = oid
+        for name in filenames:
+            if os.path.isfile(name):
+                add_file(name)
+            elif os.path.isdir(name):
+                add_directory(name)
+
 
