@@ -13,26 +13,35 @@ def init():
     data.update_ref('HEAD', data.RefValue(symbolic=True, value='refs/heads/master'))
 
 
-def write_tree(directory='.'):
+def write_tree():
     """Write the current directory's state to a tree object."""
-    entries = []
-    with os.scandir(directory) as it:
-        for entry in it:
-            full_path = os.path.join(directory, entry.name)
-            if is_ignored(full_path):
-                continue
+    index_as_tree = {}
+    with data.get_index() as index:
+        for path, oid in index.items():
+            path = path.split('/')
+            dirpath, filename = path[:-1], path[-1]
 
-            if entry.is_file(follow_symlinks=False):
-                type_ = 'blob'
-                with open(full_path, 'rb') as f:
-                    oid = data.hash_object(f.read())
-            elif entry.is_dir(follow_symlinks=False):
+            current = index_as_tree
+            # Find the directory to place the file in
+            for dirname in dirpath:
+                current = current.setdefault(dirname, {})
+            current[filename] = oid
+
+    def write_tree_recursive(tree_dict):
+        entries = []
+        for name, value in tree_dict.items():
+            if type(value) is dict:
                 type_ = 'tree'
-                oid = write_tree(full_path)
-            entries.append((entry.name, oid, type_))
+                oid = write_tree_recursive(value)
+            else:
+                type_ = 'blob'
+                oid = value
+            entries.append((name, oid, type_))
 
-        tree = ''.join(f'{type_} {oid} {name}\n' for name, oid, type_ in sorted(entries))
-        return data.hash_object(tree.encode(), 'tree')
+        tree_content = ''.join(f'{type_} {oid} {name}\n' for name, oid, type_ in sorted(entries))
+        return data.hash_object(tree_content.encode(), 'tree')
+    
+    return write_tree_recursive(index_as_tree)
 
 
 def _iter_tree_entries(oid):
