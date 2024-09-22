@@ -67,8 +67,9 @@ def parse_args():
 
     # Command to show the diff content of a repository commit object    
     diff_parser = commands.add_parser('diff', help='Show the diff content of a repository commit object')
-    diff_parser.add_argument('commit', default='@', type=oid, nargs='?')
     diff_parser.set_defaults(func=_diff)
+    diff_parser.add_argument('--cached', action='store_true')
+    diff_parser.add_argument('commit', nargs='?')
 
     # Command to checkout a commit by its object ID
     checkout_parser = commands.add_parser('checkout', help='Checkout a commit inside the current directory')
@@ -199,9 +200,25 @@ def show(args):
 
 
 def _diff(args):
-    tree = args.commit and base.get_commit(args.commit).tree
+    oid = args.commit and base.get_oid(args.commit)
 
-    result = diff.diff_trees(base.get_tree(tree), base.get_working_tree())
+    if args.commit:
+        # If a commit is specified, show the diff between the commit and the working tree
+        tree_from = base.get_tree(oid and base.get_commit(oid).tree)
+    
+    if args.cached:
+        tree_to = base.get_index_tree()
+        if not args.commit:
+            # If no commit is specified, show the diff between the index and the working tree
+            oid = base.get_oid('@')
+            tree_from = base.get_tree(oid and base.get_commit(oid).tree)
+    else:
+        tree_to = base.get_working_tree()
+        if not args.commit:
+            # If no commit is specified, show the diff between the working tree and the index
+            tree_from = base.get_index_tree()
+
+    result = diff.diff_trees(tree_from, tree_to)
     sys.stdout.flush()
     sys.stdout.buffer.write(result)
 
