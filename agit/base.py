@@ -84,6 +84,12 @@ def get_working_tree():
     return result
 
 
+def get_index_tree():
+    """Retrieve the current index tree"""
+    with data.get_index() as index:
+        return index
+
+
 def _empty_current_directory():
     """Remove all files and directories from the current directory."""
     for root, dirnames, filenames in os.walk('.', topdown=False):
