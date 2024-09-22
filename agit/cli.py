@@ -19,7 +19,11 @@ def main():
 
 def parse_args():
     """Parse command-line arguments and set up subcommands."""
-    parser = argparse.ArgumentParser(description='A simple git clone')
+    parser = argparse.ArgumentParser(
+        description='A simple Git-like version control system',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='Use "agit <command> -h" for more information about a command.'
+    )
 
     # Define subcommands
     commands = parser.add_subparsers(title='commands', dest='command')
